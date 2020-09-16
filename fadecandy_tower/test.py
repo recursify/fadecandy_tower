@@ -26,6 +26,17 @@ fire_config = {
     ]
 }
 
+rainbow_fire_config = {
+    'delay' : 0.08,
+    'reduction' : 3,
+    'gradient' : [
+        (0, (0, 0, 0)),
+        (20, (240, 0, 0)),
+        (50, (240, 240, 0)),
+        (100, (0, 0, 240))
+    ]
+}
+
 def iter_forever(input_list):
     while True:
         for item in input_list:
@@ -36,6 +47,7 @@ async def hello():
     async with websockets.connect(uri) as websocket:
         channel = 0
         effects = [
+            FireEffect(rainbow_fire_config),
             FireEffect(fire_config),
             ShimmerEffect({})
         ]
