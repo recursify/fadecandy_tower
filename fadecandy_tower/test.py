@@ -26,21 +26,6 @@ fire_config = {
     ]
 }
 
-colors = [(128, 128, 128) for i in range(256)]
-
-
-async def do_random_loop(websocket):
-    channel = 0
-
-    for i in range(256):
-        r = 96 + random.randint(-80, 48)
-        colors[i] = (r, r, r)
-
-    c = get_command(channel, colors)
-    await websocket.send(c)
-    time.sleep(0.7)
-
-
 def iter_forever(input_list):
     while True:
         for item in input_list:
@@ -59,10 +44,11 @@ async def hello():
             effect.initialize()
 
         effect_iterator = iter_forever(effects)
+        seconds_per_effect = 10
         while True:
             for effect in effect_iterator:
                 start = time.time()
-                while (time.time() - start) < 5:
+                while (time.time() - start) < seconds_per_effect:
                     canvas, delay = effect.run()
                     cmd = list(itertools.chain(*canvas))
                     c = get_command(channel, cmd)
