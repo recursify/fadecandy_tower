@@ -4,6 +4,7 @@ import itertools
 import struct
 import random
 import time
+import argparse
 from fire_effect import FireEffect
 from shimmer_effect import ShimmerEffect
 
@@ -42,8 +43,8 @@ def iter_forever(input_list):
         for item in input_list:
             yield item
 
-async def hello():
-    uri = "ws://192.168.1.93:7890"
+async def run(host, port):
+    uri = f"ws://{host}:{port}"
     async with websockets.connect(uri) as websocket:
         channel = 0
         effects = [
@@ -68,4 +69,9 @@ async def hello():
                     time.sleep(delay)
 
 
-asyncio.get_event_loop().run_until_complete(hello())
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', dest='host', default='localhost')
+    parser.add_argument('--port', dest='port', type=int, default=7890)
+    args = parser.parse_args()
+    asyncio.get_event_loop().run_until_complete(run(args.host, args.port))
