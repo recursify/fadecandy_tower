@@ -1,4 +1,5 @@
 import asyncio
+import os
 import websockets
 import itertools
 import struct
@@ -7,6 +8,7 @@ import time
 import argparse
 from fire_effect import FireEffect
 from shimmer_effect import ShimmerEffect
+from rotate_effect import RotateEffect
 
 def get_command(channel, colors):
     cmd = bytearray()
@@ -45,9 +47,21 @@ def iter_forever(input_list):
 
 async def run(host, port):
     uri = f"ws://{host}:{port}"
+
+    base = os.path.join(
+        os.path.split(os.path.abspath(__file__))[0],
+        'images'
+    )
+
     async with websockets.connect(uri) as websocket:
         channel = 0
         effects = [
+            RotateEffect({
+                'img_path' : os.path.join(base, 'abstract.png'),
+            }),
+            RotateEffect({
+                'img_path' : os.path.join(base, 'yellow_stripe.png'),
+            }),
             FireEffect(rainbow_fire_config),
             FireEffect(fire_config),
             ShimmerEffect({})
@@ -57,9 +71,10 @@ async def run(host, port):
             effect.initialize()
 
         effect_iterator = iter_forever(effects)
-        seconds_per_effect = 10
+        seconds_per_effect = 60
         while True:
             for effect in effect_iterator:
+                effect.initialize()
                 start = time.time()
                 while (time.time() - start) < seconds_per_effect:
                     canvas, delay = effect.run()
