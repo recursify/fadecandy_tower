@@ -31,7 +31,7 @@ class RotateEffect(object):
             self.angle += self.rotation_degrees
 
         # To debug what the pixels look like:
-        output.save(f'/tmp/output/frame_{self.i:03d}.png')
+        #output.save(f'/tmp/output/frame_{self.i:03d}.png')
 
         # Only return a small slice of the original Image, since the
         # corners don't survive rotation

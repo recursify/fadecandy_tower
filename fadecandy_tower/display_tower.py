@@ -71,7 +71,7 @@ async def run(host, port):
             effect.initialize()
 
         effect_iterator = iter_forever(effects)
-        seconds_per_effect = 60
+        seconds_per_effect = 10
         while True:
             for effect in effect_iterator:
                 effect.initialize()
