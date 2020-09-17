@@ -74,8 +74,13 @@ class FireEffect(object):
                 #print("i:%s j:%s    %s %s %s -> %s" % (i, j, a, b, c, row[j]))
 
         new_colors = [
+            [self.fire_table[x] for x in grid[4]],
+            [self.fire_table[x] for x in grid[5]],
+            [self.fire_table[x] for x in grid[6]],
             [self.fire_table[x] for x in grid[7]],
             [self.fire_table[x] for x in grid[8]],
-            [self.fire_table[x] for x in grid[9]]
+            [self.fire_table[x] for x in grid[9]],
+            [self.fire_table[x] for x in grid[10]],
+            [self.fire_table[x] for x in grid[11]]
         ]
         return (new_colors, self.delay)

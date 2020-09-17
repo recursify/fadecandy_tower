@@ -14,7 +14,7 @@ class ShimmerEffect(object):
 
     def run(self):
         output = []
-        for i in range(3):
+        for i in range(8):
             row = []
             for j in range(64):
                 v = self.base_value + random.randint(*self.offset_range)

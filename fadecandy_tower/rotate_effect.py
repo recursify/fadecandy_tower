@@ -35,6 +35,6 @@ class RotateEffect(object):
 
         # Only return a small slice of the original Image, since the
         # corners don't survive rotation
-        canvas = numpy.asarray(output)[30:33]
+        canvas = numpy.asarray(output)[28:36]
         self.i += 1
         return (canvas, self.delay)

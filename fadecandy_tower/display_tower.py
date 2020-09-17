@@ -20,8 +20,8 @@ def get_command(channel, colors):
     return cmd
 
 fire_config = {
-    'delay' : 0.08,
-    'reduction' : 3,
+    'delay' : 0.05,
+    'reduction' : 1,
     'gradient' : [
         (0, (0, 0, 0)),
         (40, (200, 0, 0)),
@@ -31,8 +31,8 @@ fire_config = {
 }
 
 rainbow_fire_config = {
-    'delay' : 0.08,
-    'reduction' : 3,
+    'delay' : 0.05,
+    'reduction' : 1,
     'gradient' : [
         (0, (0, 0, 0)),
         (20, (240, 0, 0)),
@@ -46,25 +46,28 @@ def iter_forever(input_list):
         for item in input_list:
             yield item
 
-
-
-async def run_forever(websocket):
+def get_all_image_paths():
     base = os.path.join(
         os.path.split(os.path.abspath(__file__))[0],
         'images'
     )
+    images = []
+    for f in os.listdir(base):
+       _, ext = os.path.splitext(f)
+       if ext == '.png':
+           images.append(os.path.join(base, f))
+    return images
+
+
+async def run_forever(websocket):
+    effects = [RotateEffect({'img_path' : p}) for p in get_all_image_paths()]
     channel = 0
-    effects = [
-        RotateEffect({
-            'img_path' : os.path.join(base, 'abstract.png'),
-        }),
-        RotateEffect({
-            'img_path' : os.path.join(base, 'yellow_stripe.png'),
-        }),
+
+    effects.extend([
         FireEffect(rainbow_fire_config),
         FireEffect(fire_config),
         ShimmerEffect({})
-    ]
+    ])
 
     for effect in effects:
         effect.initialize()
