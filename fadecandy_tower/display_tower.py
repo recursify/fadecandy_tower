@@ -45,43 +45,63 @@ def iter_forever(input_list):
         for item in input_list:
             yield item
 
-async def run(host, port):
-    uri = f"ws://{host}:{port}"
 
+
+async def run_forever(websocket):
     base = os.path.join(
         os.path.split(os.path.abspath(__file__))[0],
         'images'
     )
+    channel = 0
+    effects = [
+        RotateEffect({
+            'img_path' : os.path.join(base, 'abstract.png'),
+        }),
+        RotateEffect({
+            'img_path' : os.path.join(base, 'yellow_stripe.png'),
+        }),
+        FireEffect(rainbow_fire_config),
+        FireEffect(fire_config),
+        ShimmerEffect({})
+    ]
 
-    async with websockets.connect(uri) as websocket:
-        channel = 0
-        effects = [
-            RotateEffect({
-                'img_path' : os.path.join(base, 'abstract.png'),
-            }),
-            RotateEffect({
-                'img_path' : os.path.join(base, 'yellow_stripe.png'),
-            }),
-            FireEffect(rainbow_fire_config),
-            FireEffect(fire_config),
-            ShimmerEffect({})
-        ]
+    for effect in effects:
+        effect.initialize()
 
-        for effect in effects:
+    effect_iterator = iter_forever(effects)
+    seconds_per_effect = 10
+    while True:
+        for effect in effect_iterator:
             effect.initialize()
+            start = time.time()
+            while (time.time() - start) < seconds_per_effect:
+                canvas, delay = effect.run()
+                cmd = list(itertools.chain(*canvas))
+                c = get_command(channel, cmd)
+                await websocket.send(c)
+                await asyncio.sleep(delay)
 
-        effect_iterator = iter_forever(effects)
-        seconds_per_effect = 10
-        while True:
-            for effect in effect_iterator:
-                effect.initialize()
-                start = time.time()
-                while (time.time() - start) < seconds_per_effect:
-                    canvas, delay = effect.run()
-                    cmd = list(itertools.chain(*canvas))
-                    c = get_command(channel, cmd)
-                    await websocket.send(c)
-                    time.sleep(delay)
+async def run(uri):
+    async with websockets.connect(uri) as websocket:
+        await run_forever(websocket)
+
+async def cleanup(uri):
+    async with websockets.connect(uri) as websocket:
+        turn_off_command = get_command(0, [(0, 0, 0) for i in range(512)])
+        await websocket.send(turn_off_command)
+
+
+def main(args):
+    uri = f"ws://{args.host}:{args.port}"
+    loop = asyncio.get_event_loop()
+
+    try:
+        tasks = asyncio.gather(run(uri))
+        loop.run_until_complete(tasks)
+    finally:
+        print('Shutting down...')
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(cleanup(uri))
 
 
 if __name__ == '__main__':
@@ -89,4 +109,4 @@ if __name__ == '__main__':
     parser.add_argument('--host', dest='host', default='localhost')
     parser.add_argument('--port', dest='port', type=int, default=7890)
     args = parser.parse_args()
-    asyncio.get_event_loop().run_until_complete(run(args.host, args.port))
+    main(args)
