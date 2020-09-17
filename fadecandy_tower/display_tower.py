@@ -1,5 +1,6 @@
 import asyncio
 import os
+import signal
 import websockets
 import itertools
 import struct
@@ -103,10 +104,16 @@ def main(args):
         loop = asyncio.get_event_loop()
         loop.run_until_complete(cleanup(uri))
 
+def signal_handler(sig, frame):
+    print(f"got {sig}")
+    uri = f"ws://{args.host}:{args.port}"
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(cleanup(uri))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', dest='host', default='localhost')
     parser.add_argument('--port', dest='port', type=int, default=7890)
     args = parser.parse_args()
+    signal.signal(signal.SIGTERM, signal_handler)
     main(args)
